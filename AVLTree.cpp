@@ -107,30 +107,33 @@ BST::TreeNode* BST::helperInsert(BST::TreeNode *helpRoot, const string& name, co
         insertedNodes.push_back(new TreeNode(name, ID));
         return new TreeNode(name,ID);
     }
-    // Comparing the id thats being passed in to the id that is already in there
-    // Is the ID less than the current node val?
+        // Comparing the id thats being passed in to the id that is already in there
+        // Is the ID less than the current node val?
     else if (ID.compare(helpRoot->val.ID) < 0){
         helpRoot->left = helperInsert(helpRoot->left, name, ID, insertedNodes);
     }
-    // Is the ID greater than the current node val?
+        // Is the ID greater than the current node val?
     else if (ID.compare(helpRoot->val.ID) > 0){
         helpRoot->right = helperInsert(helpRoot->right, name, ID, insertedNodes);
+    }
+    else if (ID.compare(helpRoot->val.ID) == 0) {
+        return helpRoot;
     }
     //  check the height of the deepest node's right and left subtrees
     int heightLeft = helperLevelCount(helpRoot->left);
     int heightRight = helperLevelCount(helpRoot->right);
 
-  // right heavy
+    // right heavy
     if (heightLeft - heightRight < -1){
-      // check if right subtree is left heavy
-       if (helperLevelCount(helpRoot->right->left) - helperLevelCount(helpRoot->right->right) >= 1){
-           // perform right left rotation
-           helpRoot->right = rotateRight(helpRoot->right);
-           helpRoot = rotateLeft(helpRoot);
-       } else {
-           // perform left rotation
-           helpRoot = rotateLeft(helpRoot);
-       }
+        // check if right subtree is left heavy
+        if (helperLevelCount(helpRoot->right->left) - helperLevelCount(helpRoot->right->right) >= 1){
+            // perform right left rotation
+            helpRoot->right = rotateRight(helpRoot->right);
+            helpRoot = rotateLeft(helpRoot);
+        } else {
+            // perform left rotation
+            helpRoot = rotateLeft(helpRoot);
+        }
     }
     // left heavy
     if (heightLeft - heightRight > 1){
@@ -218,18 +221,18 @@ void BST::helperSearchName(BST::TreeNode *helpRoot, const string &searchName, ve
 void BST::helperDelete(BST::TreeNode *&helpRoot, const string& searchID, vector<TreeNode*> &deletedRoots) {
     // if it ever gets to this point, ID is not in the tree
     if (helpRoot == nullptr){
-        cout << "unsuccessful";
+        cout << "unsuccessful" << endl;
         return;
     }
     // node to be deleted is less than current id
     if (searchID.compare(helpRoot->val.ID) < 0){
         helperDelete(helpRoot->left, searchID, deletedRoots);
     }
-    // greater than current id
+        // greater than current id
     else if (searchID.compare(helpRoot->val.ID) > 0){
         helperDelete(helpRoot->right, searchID, deletedRoots);
     }
-    // we found the node to delete
+        // we found the node to delete
     else {
         // case where removed root has no children
         if (helpRoot->left == nullptr && helpRoot->right == nullptr){
@@ -237,7 +240,7 @@ void BST::helperDelete(BST::TreeNode *&helpRoot, const string& searchID, vector<
             helpRoot = nullptr;
             delete helpRoot;
         }
-        // case where removed root has one child
+            // case where removed root has one child
         else if (helpRoot->left == nullptr || helpRoot->right == nullptr){
             // if the left is not null, copy its value to the current node and delete the left
             if (helpRoot->left != nullptr){
@@ -255,14 +258,14 @@ void BST::helperDelete(BST::TreeNode *&helpRoot, const string& searchID, vector<
                 delete helpRoot->right;
             }
         }
-        // case where removed root has two children
+            // case where removed root has two children
         else{
             // right child has no left; its the inorder successor
             if (helpRoot->right->left == nullptr){
                 deletedRoots.push_back(helpRoot);
                 helpRoot->val.ID = helpRoot->right->val.ID, helpRoot->val.name = helpRoot->right->val.name;
                 helperDelete(helpRoot->right, helpRoot->right->val.ID,deletedRoots);
-            // set right child leftmost to be inorder successor, then run the function again to delete the node
+                // set right child leftmost to be inorder successor, then run the function again to delete the node
             } else {
                 // init temp root to hold deleted value
                 TreeNode* temp = helpRoot->right;
@@ -304,6 +307,11 @@ void BST::helperRemoveInOrder(BST::TreeNode* &helpRoot, int &n, vector<TreeNode*
 vector<BST::TreeNode*> BST::insert(string name, string ID){
     vector<TreeNode*> nodes;
     this->root = helperInsert(this->root, name, ID,nodes);
+    if(nodes.empty()){
+        cout << "unsuccessful" << endl;
+    } else {
+        cout << "successful" << endl;
+    }
     return nodes;
 }
 
@@ -312,7 +320,7 @@ vector<BST::TreeNode*> BST::inorder() {
     // testing purposes: make tree is being traversed correctly
     vector <TreeNode*> orderedRoots;
     helperInOrder(this->root, orderedRoots);
-    for (size_t i = 0; i < orderedRoots.size(); i++){
+    for (int i = 0; i < orderedRoots.size(); i++){
         if (i == orderedRoots.size() - 1){
             cout << orderedRoots[i]->val.name;
         } else {
@@ -328,7 +336,7 @@ vector<BST::TreeNode*> BST::preorder(){
     // testing purposes: make tree is being traversed correctly
     vector <TreeNode*> orderedRoots;
     helperPreOrder(this->root, orderedRoots);
-    for (size_t i = 0; i < orderedRoots.size(); i++){
+    for (int i = 0; i < orderedRoots.size(); i++){
         if (i == orderedRoots.size() - 1){
             cout << orderedRoots[i]->val.name;
         } else {
@@ -344,7 +352,7 @@ vector<BST::TreeNode*> BST::postorder() {
     // testing purposes: make tree is being traversed correctly
     vector <TreeNode*> orderedRoots;
     helperPostOrder(this->root, orderedRoots);
-    for (size_t i = 0; i < orderedRoots.size(); i++){
+    for (int i = 0; i < orderedRoots.size(); i++){
         if (i == orderedRoots.size() - 1){
             cout << orderedRoots[i]->val.name;
         } else {
@@ -381,6 +389,9 @@ vector<string> BST::searchName(string name) {
 vector<BST::TreeNode*> BST::removeID(string ID) {
     vector <TreeNode*> deletedRoots;
     helperDelete(this->root, ID, deletedRoots);
+    if (!deletedRoots.empty()){
+        cout << "successful" << endl;
+    }
     return deletedRoots;
 }
 
@@ -549,6 +560,7 @@ int main(){
         // user insert
         if (command == "insert"){
             string name;
+            // vector of IDs to keep
             // reading until first quote
             getline(cin ,name, '"');
 
@@ -556,36 +568,34 @@ int main(){
             getline(cin, name, '"');
 
             // name validation
-            if (!verifyName(name)){
-                cout << "unsuccessful" << endl;
-            }
             string ID;
             Student s;
             getline(cin, ID, ' ');
             getline(cin, ID);
 
             // ID validation
-            if (!verifyID(ID)){
+            if (!verifyID(ID) || !verifyName(name)){
                 cout << "unsuccessful" << endl;
+                continue;
             } else {
                 s.name = name, s.ID = ID;
                 tree.insert(name, ID);
-                cout << "successful" << endl;
+//                cout << "successful" << endl;
             }
         }
-        // user printInorder
+            // user printInorder
         else if (command == "printInorder"){
             tree.inorder();
         }
-        // user printPreorder
+            // user printPreorder
         else if (command == "printPreorder"){
             tree.preorder();
         }
-        // user printPostorder
+            // user printPostorder
         else if (command == "printPostorder"){
             tree.postorder();
         }
-        // user remove
+            // user remove
         else if (command == "remove"){
             string ID;
             string next;
@@ -596,15 +606,14 @@ int main(){
                 cout << "unsuccessful" << endl;
             } else {
                 tree.removeID(ID);
-                cout << "successful" << endl;
             }
         }
-        // user printLevelCount
+            // user printLevelCount
         else if (command == "printLevelCount"){
             tree.printLevelCount();
             cout << endl;
         }
-        // user removeInorder
+            // user removeInorder
         else if (command == "removeInorder"){
             int n;
             string next;
@@ -612,7 +621,7 @@ int main(){
             cin >> n;
             tree.removeInOrder(n);
         }
-        // user searchID or search NAME
+            // user searchID or search NAME
         else if (command == "search") {
             // skip the space after the command
             cin.ignore(1, ' ');
@@ -644,7 +653,7 @@ int main(){
                 }
             }
         }
-        // wrong/misspelled command
+            // wrong/misspelled command
         else {
             // ignoring 1000 characters to reset the command if it's unsuccessful
             cin.ignore(1000, '\n');
